@@ -8,7 +8,7 @@
     }
   ],
   "require"    : {
-
+    "thru.io/inflection": "dev-master"
   },
   "autoload"   : {
     "psr-0": {
