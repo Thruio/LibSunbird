@@ -18,8 +18,18 @@ class SunbirdRequest{
   private function get_type(){
     return strtolower(str_replace("Thru\\Sunbird\\Sunbird","", get_called_class()));
   }
-  private function get_endpoint(){
-    return SUNBIRD_HOST . "/" . SUNBIRD_API_VERSION . "/" . SUNBIRD_API_KEY . "/" . $this->get_type();
+
+  private function get_endpoint($entity = null){
+    if($entity === null){
+      $entity = $this;
+    }
+    return SUNBIRD_HOST . "/" . SUNBIRD_API_VERSION . "/" . SUNBIRD_API_KEY . "/" . $entity->get_type();
+  }
+
+  public function put($object){
+    $response = $this->request('put', $object);
+    \Kint::dump($response);
+    exit;
   }
 
   public function get_list() {
@@ -40,20 +50,24 @@ class SunbirdRequest{
     return $output;
   }
 
-  private function request($mode = 'get'){
+  private function request($mode = 'get', $data = null){
     $begin = microtime(true);
-    $endpoint = $this->get_endpoint();
-    $response = $this->curl->get($endpoint);
+    $endpoint = $this->get_endpoint($data);
+    if($data){
+      $response = $this->curl->$mode($endpoint, $data);
+    }else {
+      $response = $this->curl->$mode($endpoint);
+    }
     if($this->curl->get_status() != 200){
       throw new SunbirdException("Cannot talk to Sunbird, response was {$this->curl->get_status()} while requesting {$endpoint}");
     }
-    $response = json_decode($response);
-    if($response == false){
+    $response_decoded = json_decode($response);
+    if($response_decoded == false){
       throw new SunbirdException("Cannot decode Sunbird Response: {$response}");
     }
     $end = microtime(true);
     $time_to_execute = $end - $begin;
-    SunbirdRequestLog::log($endpoint, $response, $time_to_execute);
-    return $response;
+    SunbirdRequestLog::log($endpoint, $response_decoded, $time_to_execute);
+    return $response_decoded;
   }
 }

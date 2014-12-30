@@ -77,6 +77,37 @@ class SunbirdCurl {
     return $return;
   }
 
+  public function put($url, $data) {
+    $process = curl_init($url);
+    curl_setopt($process, CURLOPT_HTTPHEADER, $this->headers);
+    curl_setopt($process, CURLOPT_HEADER, FALSE);
+    curl_setopt($process, CURLOPT_USERAGENT, $this->user_agent);
+    if ($this->cookies == TRUE) {
+      curl_setopt($process, CURLOPT_COOKIEFILE, $this->cookie_file);
+    }
+    if ($this->cookies == TRUE) {
+      curl_setopt($process, CURLOPT_COOKIEJAR, $this->cookie_file);
+    }
+    if ($this->ssl_cert_authority){
+      curl_setopt($process, CURLOPT_CAINFO, $this->ssl_cert_authority);
+    }
+    curl_setopt($process, CURLOPT_ENCODING, $this->compression);
+    curl_setopt($process, CURLOPT_TIMEOUT, 30);
+    if ($this->proxy) {
+      curl_setopt($process, CURLOPT_PROXY, $this->proxy);
+    }
+    curl_setopt($process, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($process, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_setopt($process, CURLOPT_POSTFIELDS,http_build_query($data));
+    curl_setopt($process, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($process, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($process, CURLOPT_SSL_VERIFYPEER, 0);
+    $return = curl_exec($process);
+    $this->status = curl_getinfo($process, CURLINFO_HTTP_CODE);
+    curl_close($process);
+    return $return;
+  }
+
   public function post($url, $data) {
     $process = curl_init($url);
     curl_setopt($process, CURLOPT_HTTPHEADER, $this->headers);
